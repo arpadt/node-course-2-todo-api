@@ -5,16 +5,6 @@ let {mongoose} = require('./db/mongoose');
 let {Todo} = require('./models/todo');
 let {User} = require('./models/user');
 
-// let newUser = new User({
-//     email: 'arpad@example.com'
-// });
-
-// newUser.save().then( (doc) => {
-//     console.log(JSON.stringify(doc, undefined, 2));
-// }, (e) => {
-//     console.log('Unable to save data', e);
-// });
-
 let app = express();
 
 // this is the MW we need to give to express - returns a func with json
@@ -28,6 +18,15 @@ app.post('/todos', (req, res) => {
 
     todo.save().then( (doc) => {
         res.send(doc);      // send response back to user
+    }, (e) => {
+        res.status(400).send(e);
+    });
+});
+
+// getting all todos
+app.get('/todos', (req, res) => {
+    Todo.find().then( (todos) => {
+        res.send({todos});  // this way - as an object - we can add properties later on
     }, (e) => {
         res.status(400).send(e);
     });

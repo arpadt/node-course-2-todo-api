@@ -11,23 +11,23 @@ beforeEach( (done) => {
 
 describe('POST /todos', () => {
     it('should create a new todo', (done) => {
-        let text = 'test todo text';
+        let mockText = 'test todo text';
 
         request(app)
             .post('/todos')
-            .send({text})
+            .send({text: mockText})
             .expect(200)
             .expect( (res) => {
-                expect(res.body.text).toBe(text);
+                expect(res.body.text).toBe(mockText);
             })
-            .end( (err, res) => {
+            .end( (err, res) => {   // check what got stored in mongo
                 if (err) {
                     return done(err);
                 }
 
                 Todo.find().then( (todos) => {
                     expect(todos.length).toBe(1);
-                    expect(todos[0].text).toBe(text);
+                    expect(todos[0].text).toBe(mockText);
                     done();
                 }).catch( (e) => done(e) );
             });
