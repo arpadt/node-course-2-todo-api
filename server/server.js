@@ -49,7 +49,7 @@ app.get('/todos/:id', (req, res) => {
                 return res.status(404).send('Todo not found');
             }
             // if todo found
-            res.send({todo});
+            res.send({todo});   // we set up a todo property of this object
     }).catch( (e) => res.status(500).send('Server error')); // error, could be status 400
 });
 
