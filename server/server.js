@@ -7,6 +7,7 @@ let {Todo} = require('./models/todo');
 let {User} = require('./models/user');
 
 let app = express();
+const port = process.env.PORT || 3000;  // for Heroku
 
 // this is the MW we need to give to express - returns a func with json
 app.use(bodyParser.json());
@@ -53,8 +54,8 @@ app.get('/todos/:id', (req, res) => {
     }).catch( (e) => res.status(500).send('Server error')); // error, could be status 400
 });
 
-app.listen(3000, () => {
-    console.log('Started on port 3000');
+app.listen(port, () => {
+    console.log(`Started on port ${port}`);
 });
 
 module.exports = {app};
