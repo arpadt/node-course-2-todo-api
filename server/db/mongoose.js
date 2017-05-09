@@ -8,6 +8,6 @@ mongoose.Promise = global.Promise;
 // mongoose.connect('mongodb://localhost:27017/TodoApp'); // only for local database
 
 // PROD_MONGODB is a var created by heroku when connecting itto mlab
-mongoose.connect(process.env.PROD_MONGODB || 'mongodb://localhost:27017/TodoApp');
+mongoose.connect(process.env.PROD_MONGODB);
 
 module.exports = {mongoose};
