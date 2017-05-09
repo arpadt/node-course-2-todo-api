@@ -12,7 +12,9 @@ const todos = [{
     text: 'First test to do'
 }, {
     _id: new ObjectID(),
-    text: 'Second test to do'
+    text: 'Second test to do',
+    completed: true,
+    completedAt:333
 }];
 
 beforeEach( (done) => {
@@ -140,6 +142,53 @@ describe('DELETE /todos/:id', () => {
         request(app)
             .delete(`/todos/${badID}`)
             .expect(404)
+            .end(done);
+    });
+});
+
+describe('PATCH /todos/:id', () => {
+    // add completed and completedAt properties
+    it('should update the todo', (done) => {
+        let hexId = todos[0]._id.toHexString();
+        let originalText = todos[0].text;
+        let mockText = 'First text modified';
+        // update text, set completed true
+        request(app)
+            .patch(`/todos/${hexId}`)
+            .send({
+                text: mockText,
+                completed: true
+            })
+            .expect(200)
+            .expect( (res) => {
+                expect(res.body.todo._id).toBe(hexId);
+                expect(res.body.todo.text).toNotEqual(originalText);
+                expect(res.body.todo.text).toBe(mockText);
+                expect(res.body.todo.completed).toBe(true);
+                expect(res.body.todo.completedAt).toBeA('number');
+            })
+            .end(done);
+
+    });
+
+    // reverse
+    it('should clear completedAt when todo is not completed', (done) => {
+        let hexId = todos[1]._id.toHexString();
+        let originalText = todos[1].text;
+        let mockText = 'Second test modified';
+
+        request(app)
+            .patch(`/todos/${hexId}`)
+            .send({text: mockText, completed: false})
+            .expect(200)
+            .expect( (res) => {
+                expect(res.body.todo._id).toBe(hexId);
+                expect(res.body.todo.text).toNotEqual(originalText);
+                expect(res.body.todo.text).toBe(mockText);
+                expect(res.body.todo.completed).toBe(false);
+                expect(res.body.todo.completed).toNotEqual(todos[1].completed);
+                expect(res.body.todo.completedAt).toNotExist();
+            })
             .end(done);
     });
 });
