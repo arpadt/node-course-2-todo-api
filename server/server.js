@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
@@ -67,6 +68,33 @@ app.delete('/todos/:id', (req, res) => {
             return res.status(404).send('Todo not found');
         }
         res.status(200).send({todo});
+    }).catch( (e) => res.status(400).send());
+});
+
+// UPDATE todo route
+app.patch('/todos/:id', (req, res) => {
+    let id = req.params.id;
+    // here comes what user passed to us
+    let body = _.pick(req.body, ['text', 'completed']);  // properties we want to pull off and want the user to update
+
+    if (!ObjectID.isValid(id)) {
+        return res.status(404).send('Invalid id');
+    }
+
+    // check if the completed property is on body and is a boolean && if this boolean is true
+    if (_.isBoolean(body.completed) && body.completed) {
+        // if the user updated the completed property, we update completedAt to the current timestamp
+        body.completedAt = new Date().getTime();
+    } else {
+        body.completed = false;
+        body.completedAt = null;    // remove this property from database
+    } 
+
+    Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then( (todo) => {
+        if (!todo) {
+            return res.status(404).send();
+        }
+        res.send({todo});
     }).catch( (e) => res.status(400).send());
 });
 
