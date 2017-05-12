@@ -39,6 +39,7 @@ describe('POST /todos', () => {
                     return done(err);
                 }
 
+                // 1st technique: find only todos that have the mockText value
                 Todo.find({text: mockText}).then( (todos) => {
                     expect(todos.length).toBe(1);
                     expect(todos[0].text).toBe(mockText);
@@ -58,6 +59,7 @@ describe('POST /todos', () => {
                     return done(err);
                 }
 
+                // 2nd technique: Increase numbers by 2 (number of mock todos)
                 Todo.find().then( (todos) => {
                     expect(todos.length).toBe(2);   // this is how many data are in the dummy array
                     done();
@@ -162,12 +164,20 @@ describe('PATCH /todos/:id', () => {
             .expect(200)
             .expect( (res) => {
                 expect(res.body.todo._id).toBe(hexId);
-                expect(res.body.todo.text).toNotEqual(originalText);
                 expect(res.body.todo.text).toBe(mockText);
                 expect(res.body.todo.completed).toBe(true);
                 expect(res.body.todo.completedAt).toBeA('number');
             })
-            .end(done);
+            .end( (err, res) => {
+                if (err) {
+                    return done(err);
+                }
+
+                Todo.findById(hexId).then( (todo) => {
+                    expect(res.body.todo.text).toNotEqual(originalText);
+                    done();
+                }).catch( (e) => done(e));
+            });
 
     });
 
@@ -183,12 +193,20 @@ describe('PATCH /todos/:id', () => {
             .expect(200)
             .expect( (res) => {
                 expect(res.body.todo._id).toBe(hexId);
-                expect(res.body.todo.text).toNotEqual(originalText);
                 expect(res.body.todo.text).toBe(mockText);
                 expect(res.body.todo.completed).toBe(false);
-                expect(res.body.todo.completed).toNotEqual(todos[1].completed);
                 expect(res.body.todo.completedAt).toNotExist();
             })
-            .end(done);
+            .end( (err, res) => {
+                if (err) {
+                    return done(err);
+                }
+
+                Todo.findById(hexId).then( (todo) => {
+                    expect(res.body.todo.text).toNotEqual(originalText);
+                    expect(res.body.todo.completed).toNotEqual(todos[1].completed);
+                    done();
+                }).catch( (e) => done(e));
+            });
     });
 });

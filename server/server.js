@@ -100,6 +100,20 @@ app.patch('/todos/:id', (req, res) => {
     }).catch( (e) => res.status(400).send());
 });
 
+// POST /users
+// pick email and pw
+app.post('/users', (req, res) => {
+    let body = _.pick(req.body, ['email', 'password']);
+    let user = new User(body);  // no need to recreate the object because it already exists in body
+
+    user.save().then( () => {
+        return user.generateAuthToken();
+    }).then( (token) => {
+        // creating a custom header with x-
+        res.header('x-auth', token).send(user); // toJSON is called here with res.send()
+    }).catch( (e) => res.status(400).send(e));
+});
+
 app.listen(port, () => {
     console.log(`Started on port ${port}`);
 });
