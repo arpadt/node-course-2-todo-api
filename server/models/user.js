@@ -42,7 +42,7 @@ UserSchema.methods.toJSON = function() {
     return _.pick(userObject, ['_id', 'email']);
 };
 
-// creating custom methods on User - no arrow function here, because we need "this" for our methods!
+// creating custom instance methods on User - no arrow function here, because we need "this" for our methods!
 UserSchema.methods.generateAuthToken = function() {
     let user = this;
     let access = 'auth';
@@ -53,6 +53,24 @@ UserSchema.methods.generateAuthToken = function() {
     // save changes - we'll use it server.js so we need to return it
     return user.save().then( () => {
         return token;
+    });
+};
+
+// .statics - everything created inside turns into a model method instead of an instance method
+UserSchema.statics.findByToken = function(token) {
+    let User = this;
+    let decoded;
+
+    try {
+        decoded = jwt.verify(token, 'abc123');
+    } catch (e) {
+        return Promise.reject();  // this value would be used in the 'e' args in the catch block in server.js
+    }
+
+    return User.findOne({
+        '_id': decoded._id,
+        'tokens.token': token,
+        'tokens.access': 'auth'
     });
 };
 
