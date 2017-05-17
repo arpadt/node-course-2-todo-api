@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 // need to use schema to add methods to User
 let UserSchema = new mongoose.Schema({
@@ -12,6 +13,7 @@ let UserSchema = new mongoose.Schema({
         minlength: 1,
         unique: true,    // no email is used more than once
         validate: {
+            isAsync: false,
             validator: validator.isEmail,
             message: '{VALUE} is not a valid email'
         }
@@ -70,9 +72,27 @@ UserSchema.statics.findByToken = function(token) {
     return User.findOne({
         '_id': decoded._id,
         'tokens.token': token,
-        'tokens.access': 'auth'
+        'tokens.access': 'x-auth'
     });
 };
+
+// mongoose middleware to run before the defined event, here 'save' - need regular function for this binding
+UserSchema.pre('save', function(next) {
+    let user = this;
+
+    // check if the password was modified, this time we want to encrypt it otherwise leave it
+    if (user.isModified('password')) {
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(user.password, salt, (err, hash) => {
+                user.password = hash;
+                next();
+            });
+        });
+    } else {
+        // if not modified, move on to the next call
+        next();
+    }
+});
 
 // User
 let User = mongoose.model('User', UserSchema);
