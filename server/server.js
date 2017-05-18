@@ -101,7 +101,7 @@ app.patch('/todos/:id', (req, res) => {
     }).catch( (e) => res.status(400).send());
 });
 
-// POST /users
+// POST /users - sign up
 // pick email and pw
 app.post('/users', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
@@ -115,13 +115,27 @@ app.post('/users', (req, res) => {
     }).catch( (e) => res.status(400).send(e));
 });
 
-// private route
-app.get('/users/me', authenticate, (req, res) => {
-    res.send(req.user);
+// POST /users/login {email, password}
+app.post('/users/login', (req, res) => {
+    let body = _.pick(req.body, ['email', 'password']);
+
+    User.findByCredentials(body.email, body.password).then( user => {
+        return user.generateAuthToken()
+            .then( (token) => {
+                res.header('x-auth', token).send(user);
+        });
+    }).catch( e => {
+        res.status(400).send();
+    });
 });
 
 app.listen(port, () => {
     console.log(`Started on port ${port}`);
+});
+
+// private route
+app.get('/users/me', authenticate, (req, res) => {
+    res.send(req.user);
 });
 
 module.exports = {app};
