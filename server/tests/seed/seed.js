@@ -17,18 +17,24 @@ const users = [{
 }, {
     _id: userTwoId,
     email: 'heni@example.com',
-    password: 'userTwoPass'
+    password: 'userTwoPass',
+    tokens: [{
+        access: 'x-auth',
+        token: jwt.sign({_id: userTwoId, access: 'auth'}, 'abc123').toString()
+    }]
 }];
 
 // add seed data to test GET - dummy data
 const todos = [{
     _id: new ObjectID(),
-    text: 'First test to do'
+    text: 'First test to do',
+    _creator: userOneId
 }, {
     _id: new ObjectID(),
     text: 'Second test to do',
     completed: true,
-    completedAt:333
+    completedAt:333,
+    _creator: userTwoId
 }];
 
 const populateTodos = (done) => {

@@ -47,7 +47,7 @@ UserSchema.methods.toJSON = function() {
 // creating custom instance methods on User - no arrow function here, because we need "this" for our methods!
 UserSchema.methods.generateAuthToken = function() {
     let user = this;
-    let access = 'auth';
+    let access = 'x-auth';
     let token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
 
     user.tokens.push({access, token});
