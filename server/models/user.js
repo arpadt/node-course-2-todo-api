@@ -47,7 +47,7 @@ UserSchema.methods.toJSON = function() {
 // creating custom instance methods on User - no arrow function here, because we need "this" for our methods!
 UserSchema.methods.generateAuthToken = function() {
     let user = this;
-    let access = 'auth';
+    let access = 'x-auth';
     let token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
 
     user.tokens.push({access, token});
@@ -55,6 +55,18 @@ UserSchema.methods.generateAuthToken = function() {
     // save changes - we'll use it server.js so we need to return it
     return user.save().then( () => {
         return token;
+    });
+};
+
+UserSchema.methods.removeToken = function(token) {
+    let user = this;
+
+    return user.update({
+        // remove items from an array matching certain criteria
+        $pull: {
+            // we pull from the tokens array any object that has a token property that is equal to the token
+            tokens: {token}
+        }
     });
 };
 
